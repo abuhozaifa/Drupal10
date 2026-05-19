@@ -1,0 +1,71 @@
+<?php
+
+use Drupal\Core\Database\SchemaObjectExistsException;
+
+/**
+ * Implements hook_schema().
+ */
+function user_action_tracker_schema() {
+  $schema['user_action_logs'] = [
+    'description' => 'Stores user action logs.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+      ],
+      'uid' => [
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
+      'entity_type' => [
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+      ],
+      'action' => [
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+      ],
+      'message' => [
+        'type' => 'text',
+        'not null' => TRUE,
+      ],
+      'timestamp' => [
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
+    ],
+    'primary key' => ['id'],
+  ];
+  return $schema;
+}
+
+
+/**
+ * Adds 'entity_id' and 'username' fields to the user_action_logs table.
+ */
+function user_action_tracker_update_10() {
+  $schema = \Drupal::database()->schema();
+
+  // Add the 'username' column if it doesn't exist.
+  if (!$schema->fieldExists('user_action_logs', 'username')) {
+    $schema->addField('user_action_logs', 'username', [
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => 'Anonymous',
+      'description' => 'Stores the username of the user performing the action.',
+    ]);
+  }
+
+  // Add the 'entity_id' column if it doesn't exist.
+  if (!$schema->fieldExists('user_action_logs', 'entity_id')) {
+    $schema->addField('user_action_logs', 'entity_id', [
+      'type' => 'int',
+      'not null' => FALSE,
+      'default' => NULL,
+      'description' => 'Stores the entity ID related to the action.',
+    ]);
+  }
+}

@@ -1,0 +1,82 @@
+<?php
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Database\Database;
+use Drupal\user\Entity\User;
+
+/**
+ * Implements hook_user_login().
+ */
+function user_action_tracker_user_login(AccountInterface $account) {
+  user_action_tracker_log('user', 'login', $account->id(), NULL, 'User logged in.');
+}
+
+/**
+ * Implements hook_user_logout().
+ */
+function user_action_tracker_user_logout(AccountInterface $account) {
+  user_action_tracker_log('user', 'logout', $account->id(), NULL, 'User logged out.');
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function user_action_tracker_entity_insert(EntityInterface $entity) {
+  if (in_array($entity->getEntityTypeId(), ['node', 'block_content', 'menu_link_content'])) {
+    $user_id = \Drupal::currentUser()->id();
+    $entity_id = $entity->id();
+    user_action_tracker_log($entity->getEntityTypeId(), 'create', $user_id, $entity_id, 'Created: ' . $entity->label() . ' (ID: ' . $entity_id . ')');
+  }
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function user_action_tracker_entity_update(EntityInterface $entity) {
+  if (in_array($entity->getEntityTypeId(), ['node', 'block_content', 'menu_link_content'])) {
+    $user_id = \Drupal::currentUser()->id();
+    $entity_id = $entity->id();
+    user_action_tracker_log($entity->getEntityTypeId(), 'update', $user_id, $entity_id, 'Updated: ' . $entity->label() . ' (ID: ' . $entity_id . ')');
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function user_action_tracker_entity_delete(EntityInterface $entity) {
+  if (in_array($entity->getEntityTypeId(), ['node', 'block_content', 'menu_link_content'])) {
+    $user_id = \Drupal::currentUser()->id();
+    $entity_id = $entity->id();
+    user_action_tracker_log($entity->getEntityTypeId(), 'delete', $user_id, $entity_id, 'Deleted: ' . $entity->label() . ' (ID: ' . $entity_id . ')');
+  }
+}
+
+/**
+ * Logs user actions to the database.
+ */
+function user_action_tracker_log($entity_type, $action, $uid, $entity_id, $message) {
+  $connection = Database::getConnection();
+
+  // Get username
+  $username = 'Anonymous';
+  if ($uid > 0) {
+    $user = User::load($uid);
+    if ($user) {
+      $username = $user->getAccountName();
+    }
+  }
+  $domain = \Drupal::request()->getHost();
+  $connection->insert('user_action_logs')
+    ->fields([
+      'uid' => $uid,
+      'username' => $username,  // ✅ Store username
+      'entity_id' => $entity_id, // ✅ Store entity ID
+      'entity_type' => $entity_type,
+      'action' => $action,
+      'message' => $message,
+      'domain' => $domain,  // ✅ Store domain name
+      'timestamp' => \Drupal::time()->getRequestTime(),
+    ])
+    ->execute();
+}

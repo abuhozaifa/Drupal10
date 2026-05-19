@@ -1,0 +1,5 @@
+name: 'user_action_tracker'
+type: module
+description: 'Tracks user actions related to content, blocks, and menus, with an admin listing page.'
+package: Custom
+core_version_requirement: ^10 || ^11

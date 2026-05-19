@@ -1,0 +1,9 @@
+user_action_tracker.admin_logs:
+  title: 'User Action Logs'
+  route_name: user_action_tracker.admin_logs
+  parent: system.admin_reports
+  description: 'View a log of all user actions on the site.'
+  weight: 10
+  menu_name: administration
+  permissions: 
+    - 'administer site configuration'

@@ -1,0 +1,7 @@
+user_action_tracker.admin_logs:
+  path: '/admin/reports/user-actions'
+  defaults:
+    _controller: 'Drupal\user_action_tracker\Controller\UserActionController::actionLog'
+    _title: 'User Action Logs'
+  requirements:
+    _permission: 'administer site configuration'
