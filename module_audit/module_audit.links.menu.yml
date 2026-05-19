@@ -1,0 +1,4 @@
+module_audit.report:
+  title: 'Module Audit'
+  route_name: module_audit.report
+  parent: system.admin_reports

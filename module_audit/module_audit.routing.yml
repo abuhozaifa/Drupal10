@@ -1,0 +1,7 @@
+module_audit.report:
+  path: '/admin/reports/module-audit'
+  defaults:
+    _title: 'Module Audit'
+    _controller: '\Drupal\module_audit\Controller\ModuleAuditController::report'
+  requirements:
+    _permission: 'administer site configuration'

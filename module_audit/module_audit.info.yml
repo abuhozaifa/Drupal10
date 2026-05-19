@@ -1,0 +1,5 @@
+name: Module Audit
+type: module
+description: Track module install/uninstall history.
+core_version_requirement: ^10
+package: Custom

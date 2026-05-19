@@ -1,0 +1,3 @@
+<?php
+function module_audit_modules_installed($modules){\Drupal::service('module_audit.logger')->save($modules,'Installed');}
+function module_audit_modules_uninstalled($modules){\Drupal::service('module_audit.logger')->save($modules,'Uninstalled');}

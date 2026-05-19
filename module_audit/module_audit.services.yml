@@ -1,0 +1,4 @@
+services:
+  module_audit.logger:
+    class: Drupal\module_audit\ModuleLogger
+    arguments: ['@database','@current_user','@module_handler','@request_stack']
