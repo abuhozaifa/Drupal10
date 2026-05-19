@@ -1,0 +1,8 @@
+custom_user_notify.settings:
+  path: '/admin/config/system/custom-user-notify'
+  defaults:
+    _form: '\Drupal\custom_user_notify\Form\CustomUserNotifySettingsForm'
+    _title: 'User Notify Settings'
+  requirements:
+    _permission: 'administer site configuration'
+

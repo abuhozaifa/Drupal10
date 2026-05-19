@@ -1,0 +1,7 @@
+name: 'Custom User Notify'
+type: module
+description: 'Send email to admin when an admin updates a user password.'
+core_version_requirement: ^10
+package: Custom
+dependencies:
+  - drupal:user

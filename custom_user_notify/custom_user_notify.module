@@ -1,0 +1,156 @@
+<?php
+use Drupal\user\UserInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\user\Entity\User;
+/**
+ * Implements hook_mail().
+ */
+function custom_user_notify_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'user_password_update':
+    case 'user_account_created':
+    case 'user_account_deleted':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['message'];
+      break;
+  }
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function custom_user_notify_entity_update(EntityInterface $entity) {
+  if ($entity instanceof UserInterface && isset($entity->original)) {
+    $original = $entity->original;
+
+    // Check if password changed.
+    if ($entity->getPassword() && $original->getPassword() !== $entity->getPassword()) {
+      $current_user = \Drupal::currentUser();
+
+      // Case 1: Admin updates another user’s password.
+      $is_admin_update = $current_user->hasPermission('administer users') && $current_user->id() != $entity->id();
+
+      // Case 2: User updates their own password.
+      $is_self_update = $current_user->id() == $entity->id();
+
+      if ($is_admin_update || $is_self_update) {
+        $mailManager = \Drupal::service('plugin.manager.mail');
+
+        // Detect environment from settings.php
+        $environment = \Drupal::hasContainer() && \Drupal::service('settings')->get('environment') 
+  ? \Drupal::service('settings')->get('environment') 
+  : 'unknown';
+
+        $params['subject'] = t('@env User password updated', [
+          '@env' => ucfirst($environment),
+        ]);
+
+        if ($is_self_update) {
+          $params['message'] = t("Dear Admin,\n\nUser @user has updated their own password on @env.\n\nThanks,\nCrown Estate Scotland", [
+            '@user' => $entity->getAccountName(),
+            '@env' => ucfirst($environment),
+          ]);
+        }
+        else {
+          $params['message'] = t("Dear Admin,\n\nAdmin user @admin has updated the password of user @user on @env.\n\nThanks,\nCrown Estate Scotland", [
+            '@admin' => $current_user->getDisplayName(),
+            '@user' => $entity->getAccountName(),
+            '@env' => ucfirst($environment),
+          ]);
+        }
+
+        // Send only to one admin email (or loop admins if needed)
+        $to = \Drupal::config('custom_user_notify.settings')->get('notify_email');
+        $mailManager->mail('custom_user_notify', 'user_password_update', $to, 'en', $params);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ * Fires when a new entity is created.
+ */
+ 
+function custom_user_notify_entity_insert(EntityInterface $entity) {
+  if ($entity instanceof UserInterface) {
+    $current_user = \Drupal::currentUser();
+    $mailManager = \Drupal::service('plugin.manager.mail');
+
+    // Detect environment (from settings.php, optional).
+    $environment = \Drupal::hasContainer() && \Drupal::service('settings')->get('environment') 
+      ? \Drupal::service('settings')->get('environment') 
+      : 'unknown';
+
+    $params['subject'] = t('@env New user account created', [
+      '@env' => ucfirst($environment),
+    ]);
+
+    $params['message'] = t("Dear Admin,\n\nA new user account has been created.\n\nUsername: @username\nEmail: @mail\nCreated by: @actor (uid=@uid)\nEnvironment: @env\n\nThanks,\nCrown Estate Scotland", [
+      '@username' => $entity->getAccountName(),
+      '@mail' => $entity->getEmail() ?: '(none)',
+      '@actor' => $current_user->getDisplayName(),
+      '@uid' => $current_user->id(),
+      '@env' => ucfirst($environment),
+    ]);
+
+    // Send to configured admin email.
+    $to = \Drupal::config('custom_user_notify.settings')->get('notify_email');
+    $mailManager->mail('custom_user_notify', 'user_account_created', $to, 'en', $params);
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+ 
+function custom_user_notify_entity_delete(EntityInterface $entity) {
+  if ($entity instanceof UserInterface) {
+    $current_user = \Drupal::currentUser();
+    $mailManager = \Drupal::service('plugin.manager.mail');
+
+    // Detect environment from settings.php
+    $environment = \Drupal::hasContainer() && \Drupal::service('settings')->get('environment')
+      ? \Drupal::service('settings')->get('environment')
+      : 'unknown';
+
+    $params['subject'] = t('@env User account deleted', [
+      '@env' => ucfirst($environment),
+    ]);
+
+    $params['message'] = t("Dear Admin,\n\nA user account has been deleted.\n\nUsername: @username\nEmail: @mail\nDeleted by: @actor (uid=@uid)\nEnvironment: @env\n\nThanks,\nCrown Estate Scotland", [
+      '@username' => $entity->getAccountName(),
+      '@mail' => $entity->getEmail() ?: '(none)',
+      '@actor' => $current_user->getDisplayName(),
+      '@uid' => $current_user->id(),
+      '@env' => ucfirst($environment),
+    ]);
+
+    // Send only to one admin email (configurable)
+    $to = \Drupal::config('custom_user_notify.settings')->get('notify_email');
+    $mailManager->mail('custom_user_notify', 'user_account_deleted', $to, 'en', $params);
+  }
+}
+
+/**
+ * Implements hook_entity_presave().
+ */
+ 
+function custom_user_notify_entity_presave(EntityInterface $entity) {
+  // Only for existing users (not new ones).
+  if ($entity instanceof User && !$entity->isNew()) {
+    $current_user = \Drupal::currentUser();
+    if ($current_user->isAuthenticated()) {
+      // Store current user ID in "Updated by".
+      $entity->set('field_updated_by', $current_user->id());
+    }
+  }
+}
+
+function custom_user_notify_form_user_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  if (isset($form['field_updated_by'])) {
+    $form['field_updated_by']['#access'] = FALSE;
+  }
+}
+
+

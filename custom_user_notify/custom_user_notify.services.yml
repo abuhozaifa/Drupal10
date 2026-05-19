@@ -1,0 +1,6 @@
+services:
+  custom_user_notify.user_delete_subscriber:
+    class: Drupal\custom_user_notify\EventSubscriber\UserDeleteSubscriber
+    tags:
+      - { name: event_subscriber }
+

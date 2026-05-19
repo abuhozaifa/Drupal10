@@ -1,0 +1,7 @@
+custom_user_notify.settings:
+  title: 'User Notify Settings'
+  description: 'Configure email for password update notifications.'
+  parent: system.admin_config_system
+  route_name: custom_user_notify.settings
+  weight: 100
+
