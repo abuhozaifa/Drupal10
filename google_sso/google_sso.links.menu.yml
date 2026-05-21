@@ -1,0 +1,4 @@
+google_sso.settings:
+  title: Google SSO
+  route_name: google_sso.settings
+  parent: system.admin_config_services

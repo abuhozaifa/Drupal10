@@ -1,0 +1,21 @@
+google_sso.login:
+  path: '/google-login'
+  defaults:
+    _controller: '\Drupal\google_sso\Controller\GoogleSSOController::login'
+  requirements:
+    _access: 'TRUE'
+
+google_sso.callback:
+  path: '/google-sso/callback'
+  defaults:
+    _controller: '\Drupal\google_sso\Controller\GoogleSSOController::callback'
+  requirements:
+    _access: 'TRUE'
+
+google_sso.settings:
+  path: '/admin/config/google-sso'
+  defaults:
+    _form: '\Drupal\google_sso\Form\GoogleSSOSettingsForm'
+    _title: 'Google SSO'
+  requirements:
+    _permission: 'administer site configuration'

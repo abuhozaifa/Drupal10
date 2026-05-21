@@ -1,0 +1,8 @@
+{
+  "name": "custom/google_sso",
+  "description": "Google SSO Drupal 10 module",
+  "type": "drupal-custom-module",
+  "require": {
+    "google/apiclient": "^2.18"
+  }
+}

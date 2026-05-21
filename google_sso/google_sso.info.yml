@@ -1,0 +1,6 @@
+name: Google SSO
+type: module
+description: Google SSO Login
+package: Custom
+core_version_requirement: ^10
+configure: google_sso.settings

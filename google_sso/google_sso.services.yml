@@ -1,0 +1,5 @@
+services:
+  google_sso.client:
+    class: Drupal\google_sso\Service\GoogleClientService
+    arguments:
+      - '@config.factory'
