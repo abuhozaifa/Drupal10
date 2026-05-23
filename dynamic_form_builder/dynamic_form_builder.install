@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function dynamic_form_builder_schema() {
+  $schema['dfb_submission'] = [
+    'description' => 'Stores form submissions',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+      ],
+      'form_id' => [
+        'type' => 'varchar',
+        'length' => 128,
+      ],
+      'data' => [
+        'type' => 'text',
+        'size' => 'big',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
+    ],
+    'primary key' => ['id'],
+  ];
+
+  return $schema;
+}

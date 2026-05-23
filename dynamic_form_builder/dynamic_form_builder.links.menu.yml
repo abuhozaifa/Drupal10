@@ -1,0 +1,4 @@
+dynamic_form_builder.admin:
+  title: 'Dynamic Forms'
+  route_name: dynamic_form_builder.admin
+  parent: system.admin_structure

@@ -1,0 +1,10 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Custom Module module.
+ */
+
+/**
+ * Implements hook_views_api().
+ */

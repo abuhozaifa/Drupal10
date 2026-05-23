@@ -1,0 +1,39 @@
+dynamic_form_builder.admin:
+  path: '/admin/structure/dynamic-forms'
+  defaults:
+    _form: '\Drupal\dynamic_form_builder\Form\FormBuilderAdminForm'
+    _title: 'Dynamic Form Builder'
+  requirements:
+    _permission: 'administer site configuration'
+
+dynamic_form_builder.admin_create:
+  path: '/admin/dynamic-form/create'
+  defaults:
+    _form: '\Drupal\dynamic_form_builder\Form\FormBuilderAdminForm'
+    _title: 'Create Dynamic Form'
+  requirements:
+    _permission: 'administer site configuration'    
+
+dynamic_form_builder.form:
+  path: '/dynamic-form/{form_id}'
+  defaults:
+    _controller: '\Drupal\dynamic_form_builder\Controller\FormPageController::view'
+    _title: 'Dynamic Form'
+  requirements:
+    _permission: 'access content'
+
+dynamic_form_builder.list:
+  path: '/admin/dynamic-form'
+  defaults:
+    _form: '\Drupal\dynamic_form_builder\Form\FormList'
+    _title: 'Dynamic Forms'
+  requirements:
+    _permission: 'administer site configuration'
+    
+dynamic_form_builder.edit:
+  path: '/admin/dynamic-form/edit/{form_id}'
+  defaults:
+    _form: '\Drupal\dynamic_form_builder\Form\FormEdit'
+    _title: 'Edit Dynamic Form'
+  requirements:
+    _permission: 'administer site configuration'    

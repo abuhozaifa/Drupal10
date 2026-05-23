@@ -1,0 +1,7 @@
+name: Dynamic Form Builder
+type: module
+description: Lightweight dynamic form builder module
+core_version_requirement: ^10
+package: Custom
+dependencies:
+  - drupal:system
