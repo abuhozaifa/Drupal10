@@ -1,0 +1,4 @@
+services:
+  google_gemini_ai.service:
+    class: Drupal\google_gemini_ai\Service\GeminiService
+    arguments: ['@http_client']

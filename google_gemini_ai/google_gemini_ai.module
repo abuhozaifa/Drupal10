@@ -1,0 +1,180 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_alter().
+ */
+function google_gemini_ai_form_alter(
+  array &$form,
+  FormStateInterface $form_state,
+  $form_id
+) {
+
+  // Sirf Article content type ke liye
+  if ($form_id === 'node_article_form') {
+
+    // AI Prompt field
+    $form['ai_prompt'] = [
+      '#type' => 'textarea',
+      '#title' => t('AI Prompt'),
+      '#description' => t('Enter prompt for Gemini AI'),
+      '#default_value' => '',
+      '#required' => FALSE,
+      '#weight' => -100,
+      '#attributes' => [
+        'id' => 'edit-ai-prompt',
+      ],
+    ];
+
+    // Body wrapper AJAX ke liye
+    if (isset($form['body'])) {
+
+      $form['body']['#prefix'] =
+        '<div id="body-wrapper">';
+
+      $form['body']['#suffix'] =
+        '</div>';
+    }
+
+    // Generate button
+    $form['generate_ai'] = [
+
+      '#type' => 'submit',
+
+      '#value' => t(
+        'Generate AI Content'
+      ),
+
+      '#weight' => -99,
+
+      '#limit_validation_errors' => [],
+
+      '#submit' => [
+        'google_gemini_ai_generate_submit'
+      ],
+
+      '#ajax' => [
+
+        'callback' =>
+        'google_gemini_ai_ajax_callback',
+
+        'wrapper' =>
+        'body-wrapper',
+
+        'progress' => [
+
+          'type' => 'throbber',
+
+          'message' => t(
+            'Generating AI content...'
+          ),
+
+        ],
+      ],
+    ];
+
+  }
+
+}
+
+/**
+ * Generate AI content.
+ */
+function google_gemini_ai_generate_submit(
+  array &$form,
+  FormStateInterface $form_state
+) {
+
+  // AJAX user input
+  $user_input =
+    $form_state->getUserInput();
+
+  $prompt =
+    trim(
+      $user_input['ai_prompt']
+      ?? ''
+    );
+
+  if (empty($prompt)) {
+
+    \Drupal::messenger()
+      ->addError(
+        t('Please enter prompt')
+      );
+
+    return;
+  }
+
+  $content =
+    \Drupal::service(
+      'google_gemini_ai.service'
+    )->generateContent(
+      $prompt
+    );
+
+  \Drupal::logger(
+    'google_gemini_ai'
+  )->notice(
+    'Generated: @text',
+    [
+      '@text' =>
+      substr(
+        $content,
+        0,
+        100
+      )
+    ]
+  );
+
+  // Store temporarily
+  $form_state->set(
+    'ai_generated_content',
+    $content
+  );
+
+  $form_state->setRebuild(TRUE);
+
+}
+
+/**
+ * AJAX callback.
+ */
+function google_gemini_ai_ajax_callback(
+  array &$form,
+  FormStateInterface $form_state
+) {
+
+  $content =
+    $form_state->get(
+      'ai_generated_content'
+    );
+
+  if (
+    !empty($content)
+    &&
+    isset(
+      $form['body']
+      ['widget'][0]
+      ['value']
+    )
+  ) {
+
+    // Fill body field
+    $form['body']
+    ['widget'][0]
+    ['value']
+    ['#value']
+      = $content;
+
+    $form['body']
+    ['widget'][0]
+    ['value']
+    ['#default_value']
+      = $content;
+
+  }
+
+  return $form['body'];
+
+}

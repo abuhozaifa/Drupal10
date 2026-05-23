@@ -1,0 +1,5 @@
+name: Google Gemini AI
+type: module
+description: Integrates Google Gemini AI content generation with Drupal 10 node forms
+core_version_requirement: ^10
+package: Custom
